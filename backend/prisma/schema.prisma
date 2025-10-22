@@ -1,14 +1,15 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
+generator client { provider = "prisma-client-js" }
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+datasource db { provider = "postgresql" url = env("DATABASE_URL") }
 
-generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
-}
+model User { id String @id @default(uuid()) email String @unique password String apiKey String @unique createdAt DateTime @default(now()) urls Url[] }
 
-datasource db {
-  provider = "postgresql"
-}
+model Url { id String @id @default(uuid()) // Primary key for database relations longUrl String shortCode String @unique @db.VarChar(10) // Indexed field for lookups customAlias String? @unique userId String? expiresAt DateTime? createdAt DateTime @default(now()) clicks Int @default(0) isActive Boolean @default(true) user User? @relation(fields: [userId], references: [id]) analytics Analytics[]
+
+@@index([shortCode]) @@index([userId, createdAt]) }
+
+model Analytics { id String @id @default(uuid()) urlId String // Foreign key to Url.id clickedAt DateTime @default(now()) ipAddress String country String? city String? device String? browser String? referrer String? url Url @relation(fields: [urlId], references: [id])
+
+@@index([urlId, clickedAt]) }
