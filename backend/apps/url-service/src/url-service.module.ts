@@ -9,6 +9,7 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis';
 import { Redis } from 'ioredis';
 import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
+import { RedisCacheService } from './redis.service';
 
 @Module({
   imports: [
@@ -36,10 +37,12 @@ import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
   providers: [
     UrlServiceService, 
     UrlService,
+    RedisCacheService,
     {
       provide: APP_GUARD,
       useClass: DynamicThrottlerGuard,
     },
   ],
+  exports: [RedisCacheService],
 })
 export class UrlServiceModule {}

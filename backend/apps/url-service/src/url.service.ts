@@ -2,6 +2,7 @@ import { Injectable, Inject, BadRequestException, NotFoundException, ConflictExc
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { PrismaService } from './prisma.service';
+import { RedisCacheService } from './redis.service';
 import { IsUrl } from 'class-validator';
 import * as crypto from 'crypto';
 
@@ -13,6 +14,7 @@ export class UrlService {
   constructor(
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
+    private readonly redisCacheService: RedisCacheService,
   ) {}
 
   /**
@@ -150,7 +152,11 @@ export class UrlService {
     const cachedLongUrl = await this.cacheManager.get(`shortcode:${shortCode}`);
     
     if (cachedLongUrl) {
-      // TODO: Emit to RabbitMQ for asynchronously incrementing the click counter
+      // Cache analytics event for later processing with RabbitMQ
+      await this.redisCacheService.cacheAnalyticsEvent('cached-url-id', {
+        ipAddress: '127.0.0.1',
+        device: 'desktop',
+      });
       return cachedLongUrl as string;
     }
 
@@ -175,7 +181,11 @@ export class UrlService {
     // Cache the result for future requests
     await this.cacheManager.set(`shortcode:${shortCode}`, url.longUrl, 24 * 60 * 60 * 1000);
 
-    // TODO: Emit to RabbitMQ for asynchronously incrementing the click counter
+    // Cache analytics event for later processing with RabbitMQ
+    await this.redisCacheService.cacheAnalyticsEvent(url.id, {
+      ipAddress: '127.0.0.1',
+      device: 'desktop',
+    });
     return url.longUrl;
   }
 
