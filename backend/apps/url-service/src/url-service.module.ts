@@ -10,11 +10,13 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { Redis } from 'ioredis';
 import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
 import { RedisCacheService } from './redis.service';
+import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
     PrismaModule, 
     RedisModule,
+    RabbitMQModule,
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
         throttlers: [
