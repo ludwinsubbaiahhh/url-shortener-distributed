@@ -1,6 +1,7 @@
 import { Injectable, Inject, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
+import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService } from './prisma.service';
 import { RedisCacheService } from './redis.service';
 import { IsUrl } from 'class-validator';
@@ -15,6 +16,7 @@ export class UrlService {
     private readonly prismaService: PrismaService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly redisCacheService: RedisCacheService,
+    @Inject('URL_SERVICE_QUEUE') private readonly rabbitClient: ClientProxy,
   ) {}
 
   /**
@@ -152,10 +154,13 @@ export class UrlService {
     const cachedLongUrl = await this.cacheManager.get(`shortcode:${shortCode}`);
     
     if (cachedLongUrl) {
-      // Cache analytics event for later processing with RabbitMQ
-      await this.redisCacheService.cacheAnalyticsEvent('cached-url-id', {
+      // Emit analytics event to RabbitMQ
+      this.rabbitClient.emit('url.analytics', {
+        urlId: 'cached-url-id',
         ipAddress: '127.0.0.1',
-        device: 'desktop',
+        userAgent: 'placeholder',
+        referrer: 'placeholder',
+        timestamp: new Date()
       });
       return cachedLongUrl as string;
     }
@@ -181,10 +186,13 @@ export class UrlService {
     // Cache the result for future requests
     await this.cacheManager.set(`shortcode:${shortCode}`, url.longUrl, 24 * 60 * 60 * 1000);
 
-    // Cache analytics event for later processing with RabbitMQ
-    await this.redisCacheService.cacheAnalyticsEvent(url.id, {
+    // Emit analytics event to RabbitMQ
+    this.rabbitClient.emit('url.analytics', {
+      urlId: url.id,
       ipAddress: '127.0.0.1',
-      device: 'desktop',
+      userAgent: 'placeholder',
+      referrer: 'placeholder',
+      timestamp: new Date()
     });
     return url.longUrl;
   }
