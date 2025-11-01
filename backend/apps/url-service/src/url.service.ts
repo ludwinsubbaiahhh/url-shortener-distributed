@@ -5,6 +5,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService } from './prisma.service';
 import { RedisCacheService } from './redis.service';
 import { IsUrl } from 'class-validator';
+import { Request } from 'express';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -149,19 +150,26 @@ export class UrlService {
   /**
    * Retrieves the long URL for a given short code
    */
-  async getLongUrl(shortCode: string): Promise<string> {
+  async getLongUrl(shortCode: string, req: Request): Promise<string> {
     // Check Redis cache first
     const cachedLongUrl = await this.cacheManager.get(`shortcode:${shortCode}`);
     
     if (cachedLongUrl) {
-      // Emit analytics event to RabbitMQ
-      this.rabbitClient.emit('url.analytics', {
-        urlId: 'cached-url-id',
-        ipAddress: '127.0.0.1',
-        userAgent: 'placeholder',
-        referrer: 'placeholder',
-        timestamp: new Date()
+      // Look up URL from database to get the ID for analytics
+      const url = await this.prismaService.url.findUnique({
+        where: { shortCode },
       });
+
+      if (url) {
+        // Emit analytics event to RabbitMQ
+        this.rabbitClient.emit('url.analytics', {
+          urlId: url.id,
+          ipAddress: req.ip || '127.0.0.1',
+          userAgent: req.headers['user-agent'] || 'unknown',
+          referrer: req.headers['referer'] || 'direct',
+          timestamp: new Date()
+        });
+      }
       return cachedLongUrl as string;
     }
 
@@ -189,9 +197,9 @@ export class UrlService {
     // Emit analytics event to RabbitMQ
     this.rabbitClient.emit('url.analytics', {
       urlId: url.id,
-      ipAddress: '127.0.0.1',
-      userAgent: 'placeholder',
-      referrer: 'placeholder',
+      ipAddress: req.ip || '127.0.0.1',
+      userAgent: req.headers['user-agent'] || 'unknown',
+      referrer: req.headers['referrer'] || 'direct',
       timestamp: new Date()
     });
     return url.longUrl;
