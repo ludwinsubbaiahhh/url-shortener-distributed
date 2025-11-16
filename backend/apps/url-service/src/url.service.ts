@@ -210,6 +210,21 @@ export class UrlService {
       where: { userId },
     });
   }
+
+  async deleteUrl(shortCode: string, userId: string): Promise<void> {
+    const url = await this.prismaService.url.findUnique({
+      where: { shortCode },
+    });
+    if (!url) {
+      throw new NotFoundException('Short URL not found');
+    }
+    if (url.userId !== userId) {
+      throw new NotFoundException('Short URL not found'); // avoid leaking existence
+    }
+    await this.prismaService.url.delete({
+      where: { shortCode },
+    });
+  }
   /**
    * Validates if a string is a valid URL
    */

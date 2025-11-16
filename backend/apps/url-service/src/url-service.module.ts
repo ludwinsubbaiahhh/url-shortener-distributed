@@ -12,6 +12,8 @@ import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
 import { RedisCacheService } from './redis.service';
 import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.module';
 import { AuthModule } from './auth/auth.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver } from '@nestjs/apollo';
 
 @Module({
   imports: [
@@ -19,6 +21,11 @@ import { AuthModule } from './auth/auth.module';
     RedisModule,
     AuthModule,
     RabbitMQModule,
+    GraphQLModule.forRoot({
+      driver: ApolloDriver,
+      autoSchemaFile: true,
+      playground: true,
+    }),
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
         throttlers: [
