@@ -67,7 +67,7 @@ export class UrlService {
   /**
    * Shortens a URL with optional custom alias
    */
-  async shortenUrl(longUrl: string, userId?: string, customAlias?: string): Promise<{
+  async shortenUrl(longUrl: string, userId: string, customAlias?: string): Promise<{
     id: string;
     shortCode: string;
     longUrl: string;
@@ -126,7 +126,7 @@ export class UrlService {
         longUrl,
         shortCode,
         customAlias: customAlias || null,
-        userId: userId || null,
+        userId: userId,
         expiresAt: null, // Can be set based on business logic
       },
     });
@@ -199,12 +199,17 @@ export class UrlService {
       urlId: url.id,
       ipAddress: req.ip || '127.0.0.1',
       userAgent: req.headers['user-agent'] || 'unknown',
-      referrer: req.headers['referrer'] || 'direct',
+      referrer: req.headers['referer'] || 'direct',
       timestamp: new Date()
     });
     return url.longUrl;
   }
 
+  async getUrlsForUser(userId: string) {
+    return this.prismaService.url.findMany({
+      where: { userId },
+    });
+  }
   /**
    * Validates if a string is a valid URL
    */
