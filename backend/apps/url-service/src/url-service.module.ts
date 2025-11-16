@@ -11,11 +11,13 @@ import { Redis } from 'ioredis';
 import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
 import { RedisCacheService } from './redis.service';
 import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
     PrismaModule, 
     RedisModule,
+    AuthModule,
     RabbitMQModule,
     ThrottlerModule.forRootAsync({
       useFactory: () => ({
