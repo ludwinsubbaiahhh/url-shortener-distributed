@@ -225,6 +225,22 @@ export class UrlService {
       where: { shortCode },
     });
   }
+
+  async getAnalyticsForUrl(shortCode: string, userId: string) {
+    const url = await this.prismaService.url.findUnique({
+      where: { shortCode },
+    });
+    if (!url) {
+      throw new NotFoundException('Short URL not found');
+    }
+    if (url.userId !== userId) {
+      throw new NotFoundException('Short URL not found');
+    }
+    return this.prismaService.analytics.findMany({
+      where: { urlId: url.id },
+      orderBy: { clickedAt: 'desc' },
+    });
+  }
   /**
    * Validates if a string is a valid URL
    */

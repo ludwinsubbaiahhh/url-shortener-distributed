@@ -14,6 +14,7 @@ import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.mo
 import { AuthModule } from './auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
+import { AnalyticsGateway } from './analytics.gateway';
 
 @Module({
   imports: [
@@ -49,11 +50,12 @@ import { ApolloDriver } from '@nestjs/apollo';
     UrlServiceService, 
     UrlService,
     RedisCacheService,
+    AnalyticsGateway,
     {
       provide: APP_GUARD,
       useClass: DynamicThrottlerGuard,
     },
   ],
-  exports: [RedisCacheService],
+  exports: [RedisCacheService, AnalyticsGateway],
 })
 export class UrlServiceModule {}

@@ -4,17 +4,27 @@ import { UrlServiceService } from './url-service.service';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { EventPattern, Payload } from '@nestjs/microservices';
+import { AnalyticsGateway } from './analytics.gateway';
 
 @Controller()
 export class UrlServiceController {
   constructor(
     private readonly urlServiceService: UrlServiceService,
     private readonly urlService: UrlService,
+    private readonly analyticsGateway: AnalyticsGateway,
   ) {}
 
   @Get()
   getHello(): string {
     return this.urlServiceService.getHello();
+  }
+
+  @EventPattern('analytics.updated')
+  async handleAnalyticsUpdated(@Payload() payload: any) {
+    if (payload?.shortCode) {
+      this.analyticsGateway.sendAnalyticsUpdate(payload.shortCode, payload);
+    }
   }
 
   @UseGuards(JwtAuthGuard)
