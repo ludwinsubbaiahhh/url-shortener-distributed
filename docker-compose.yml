@@ -44,19 +44,19 @@ services:
       timeout: 10s
       retries: 5
 
-  # 4. Our Backend (All 3 services in one)
-  backend:
+  # 4. Our 3 Backend Services (Corrected)
+  # All 3 services will build from the same backend/Dockerfile
+  # but will run different commands.
+
+  url-service:
     build: ./backend
+    command: sh -c "npx -r dotenv/config prisma db push && node dist/apps/url-service/main"
     ports:
-      - "3001:3001" # UrlService (for Nginx)
-      - "3002:3002" # AnalyticsService
-      - "3003:3003" # WorkerService
+      - "3001:3001" # Main API port
     environment:
-      # Connect to our services
       DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
       REDIS_URL: "redis://redis:6379"
       RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"
-      # Auth secrets
       JWT_SECRET: "YOUR_SUPER_SECRET_KEY_CHANGE_THIS"
       JWT_EXPIRES_IN: "1d"
     depends_on:
@@ -66,6 +66,30 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+
+  analytics-service:
+    build: ./backend
+    command: node dist/apps/analytics-service/main
+    ports:
+      - "3002:3002"
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
+      REDIS_URL: "redis://redis:6379"
+      RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"
+    depends_on:
+      - url-service # Wait for the main service (and its migration) to be up
+
+  worker-service:
+    build: ./backend
+    command: node dist/apps/worker-service/main
+    ports:
+      - "3003:3003"
+    environment:
+      DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
+      REDIS_URL: "redis://redis:6379"
+      RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"
+    depends_on:
+      - url-service
 
   # 5. Our Frontend
   frontend:
@@ -83,10 +107,9 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - url-service
       - frontend
 
 volumes:
   postgres_data:
   redis_data:
-
