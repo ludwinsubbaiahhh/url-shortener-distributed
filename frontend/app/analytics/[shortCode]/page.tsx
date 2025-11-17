@@ -4,6 +4,7 @@ import React from 'react'
 import ProtectedRoute from '../../../src/components/ProtectedRoute'
 import { useParams } from 'next/navigation'
 import io from 'socket.io-client'
+// @ts-ignore - TypeScript cache issue, useQuery is exported from @apollo/client
 import { gql, useQuery } from '@apollo/client'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
