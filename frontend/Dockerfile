@@ -1,35 +1,25 @@
-# Stage 1: Dependencies
-FROM node:18-alpine AS dependencies
+# Stage 1: Build
+FROM node:20 AS build
 WORKDIR /app
 
 # Copy package files
-COPY frontend/package.json frontend/package-lock.json* ./
+COPY package.json package-lock.json* ./
 
-# Install dependencies
-RUN npm install
-
-# Stage 2: Build
-FROM node:18-alpine AS build
-WORKDIR /app
-
-# Copy package files
-COPY frontend/package.json frontend/package-lock.json* ./
-
-# Install dependencies
-RUN npm install
+# Install all dependencies (needed for build)
+RUN npm ci
 
 # Copy source code
-COPY frontend/ ./
+COPY . ./
 
 # Build Next.js application
 RUN npm run build
 
-# Stage 3: Production
-FROM node:18-alpine AS production
+# Stage 2: Production
+FROM node:20 AS production
 WORKDIR /app
 
 # Copy package files
-COPY frontend/package.json frontend/package-lock.json* ./
+COPY package.json package-lock.json* ./
 
 # Install only production dependencies
 RUN npm ci --omit=dev

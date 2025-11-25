@@ -1,11 +1,11 @@
 import { Injectable, Inject, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { ClientProxy } from '@nestjs/microservices';
 import { PrismaService } from './prisma.service';
 import { RedisCacheService } from './redis.service';
 import { IsUrl } from 'class-validator';
-import { Request } from 'express';
+import type { Request } from 'express';
 import * as crypto from 'crypto';
 
 @Injectable()
@@ -95,7 +95,7 @@ export class UrlService {
           shortCode: existingUrl.shortCode,
           longUrl: existingUrl.longUrl,
           shortUrl: `${process.env.BASE_URL || 'http://localhost:3000'}/${existingUrl.shortCode}`,
-          expiresAt: existingUrl.expiresAt,
+          expiresAt: existingUrl.expiresAt ?? undefined,
           createdAt: existingUrl.createdAt,
         };
       }
@@ -142,7 +142,7 @@ export class UrlService {
       shortCode: newUrl.shortCode,
       longUrl: newUrl.longUrl,
       shortUrl: `${process.env.BASE_URL || 'http://localhost:3000'}/${newUrl.shortCode}`,
-      expiresAt: newUrl.expiresAt,
+      expiresAt: newUrl.expiresAt ?? undefined,
       createdAt: newUrl.createdAt,
     };
   }

@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Param, Req, Res, UseGuards } from '@nestjs/common';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { UrlServiceService } from './url-service.service';
 import { UrlService } from './url.service';
 import { CreateUrlDto } from './dto/create-url.dto';

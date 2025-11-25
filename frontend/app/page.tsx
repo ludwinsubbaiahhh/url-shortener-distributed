@@ -1,5 +1,7 @@
-import dynamic from 'next/dynamic'
-const UrlShortenerForm = dynamic(() => import('../src/components/UrlShortenerForm'), { ssr: false })
+'use client'
+
+import UrlShortenerForm from '../src/components/UrlShortenerForm'
+
 export default function Home() {
   return (
     <main className="min-h-screen w-full bg-background">
@@ -8,9 +10,6 @@ export default function Home() {
         <p className="mt-2 text-muted-foreground">
           Paste your long link, optionally choose a custom alias, and get a short link you can share.
         </p>
-        {/* @ts-expect-error Server component imports client component */}
-        {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
-        {/* @ts-ignore */}
         <UrlShortenerForm />
       </section>
     </main>

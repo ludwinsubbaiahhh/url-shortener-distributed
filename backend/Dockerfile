@@ -1,75 +1,47 @@
-# Stage 1: Dependencies
-FROM node:18-alpine AS dependencies
+# Stage 1: Build
+FROM node:20 AS build
 WORKDIR /app
 
-# Copy root package files
+# Copy package files
 COPY package.json package-lock.json ./
 
-# Copy backend package files
-COPY backend/package.json backend/package-lock.json ./backend/
-
-# Install root dependencies
-RUN npm install
-
-# Install backend dependencies
-WORKDIR /app/backend
-RUN npm install
-
-# Stage 2: Build
-FROM node:18-alpine AS build
-WORKDIR /app
-
-# Copy root package files
-COPY package.json package-lock.json ./
-
-# Copy backend package files
-COPY backend/package.json backend/package-lock.json ./backend/
-
-# Install root dependencies (for build tools)
-RUN npm install
-
-# Install backend dependencies
-WORKDIR /app/backend
-RUN npm install
+# Install all dependencies (needed for build)
+RUN npm install --legacy-peer-deps
 
 # Copy source code
-COPY backend/ ./
+COPY . ./
 
 # Copy Prisma schema
-COPY backend/prisma ./prisma/
+COPY prisma ./prisma/
 
-# Generate Prisma client
-RUN npx -r dotenv/config prisma generate
+# Generate Prisma client (set dummy DATABASE_URL for config file, not actually used)
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
-# Build all applications
-RUN npm run build
+# Build all applications explicitly
+RUN npx nest build url-service && \
+    npx nest build analytics-service && \
+    npx nest build worker-service
 
-# Stage 3: Production
-FROM node:18-alpine AS production
+# Stage 2: Production
+FROM node:20 AS production
 WORKDIR /app
 
-# Copy root package files
-COPY package.json package-lock.json ./
-
-# Copy backend package files
-COPY backend/package.json backend/package-lock.json ./backend/
+# Copy package files and updated lock file from build stage
+COPY package.json ./
+COPY --from=build /app/package-lock.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
-WORKDIR /app/backend
-RUN npm ci --omit=dev
-
-# Copy Prisma schema and generate client
-COPY backend/prisma ./prisma/
-RUN npx prisma generate
+# Copy Prisma schema and generate client (set dummy DATABASE_URL for config file)
+COPY prisma ./prisma/
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
 # Copy built applications
-COPY --from=build /app/backend/dist ./dist
+COPY --from=build /app/dist ./dist
 
 # Expose ports (adjust as needed)
 EXPOSE 3001 3002 3003
 
-# Run all three services
-CMD node dist/apps/url-service/main.js & node dist/apps/analytics-service/main.js & node dist/apps/worker-service/main.js & wait
-
+# Default command (will be overridden in docker-compose)
+CMD ["node", "dist/apps/url-service/main.js"]

@@ -1,9 +1,24 @@
 'use client'
 
-import { gql, useMutation, useQuery } from '@apollo/client'
+'use client'
+
+import { gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { toast } from 'sonner'
+
+type UrlRow = {
+  id: string
+  longUrl: string
+  shortCode: string
+  createdAt: string
+  clicks?: number | null
+}
+
+type MyUrlsResponse = {
+  myUrls: UrlRow[]
+}
 
 const MY_URLS = gql`
   query MyUrls {
@@ -25,7 +40,7 @@ const DELETE_URL = gql`
 `
 
 export default function UrlTable() {
-  const { data, loading, error, refetch } = useQuery(MY_URLS)
+  const { data, loading, error, refetch } = useQuery<MyUrlsResponse>(MY_URLS)
   const [deleteUrl, { loading: deleting }] = useMutation(DELETE_URL, {
     onCompleted: () => {
       toast.success('Link deleted')

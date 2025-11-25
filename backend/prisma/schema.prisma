@@ -1,15 +1,51 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
-generator client { provider = "prisma-client-js" }
+generator client {
+  provider = "prisma-client-js"
+}
 
-datasource db { provider = "postgresql" url = env("DATABASE_URL") }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-model User { id String @id @default(uuid()) email String @unique password String apiKey String @unique createdAt DateTime @default(now()) urls Url[] }
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  apiKey    String   @unique
+  createdAt DateTime @default(now())
+  urls      Url[]
+}
 
-model Url { id String @id @default(uuid()) // Primary key for database relations longUrl String shortCode String @unique @db.VarChar(10) // Indexed field for lookups customAlias String? @unique userId String? expiresAt DateTime? createdAt DateTime @default(now()) clicks Int @default(0) isActive Boolean @default(true) user User? @relation(fields: [userId], references: [id]) analytics Analytics[]
+model Url {
+  id          String      @id @default(uuid())
+  longUrl     String
+  shortCode   String      @unique @db.VarChar(10)
+  customAlias String?     @unique
+  userId      String?
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  clicks      Int         @default(0)
+  isActive    Boolean     @default(true)
+  user        User?       @relation(fields: [userId], references: [id])
+  analytics   Analytics[]
 
-@@index([shortCode]) @@index([userId, createdAt]) }
+  @@index([shortCode])
+  @@index([userId, createdAt])
+}
 
-model Analytics { id String @id @default(uuid()) urlId String // Foreign key to Url.id clickedAt DateTime @default(now()) ipAddress String country String? city String? device String? browser String? referrer String? url Url @relation(fields: [urlId], references: [id])
+model Analytics {
+  id        String   @id @default(uuid())
+  urlId     String
+  clickedAt DateTime @default(now())
+  ipAddress String
+  country   String?
+  city      String?
+  device    String?
+  browser   String?
+  referrer  String?
+  url       Url      @relation(fields: [urlId], references: [id])
 
-@@index([urlId, clickedAt]) }
+  @@index([urlId, clickedAt])
+}

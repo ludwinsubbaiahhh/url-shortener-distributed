@@ -1,6 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 
 @Injectable()
 export class RedisCacheService {
@@ -36,12 +36,9 @@ export class RedisCacheService {
   async cacheAnalyticsEvent(urlId: string, eventData: object): Promise<void> {
     const key = `analytics:buffer:${urlId}`;
     
-    // Use Redis RPUSH to add event to the buffer list
-    // Note: This assumes the cache manager supports Redis operations
-    // In a real implementation, you might need to access the underlying Redis client
-    await this.cacheManager.store.client?.rpush(key, JSON.stringify(eventData));
-    
-    // Set expiration for the buffer (e.g., 1 hour) to prevent indefinite growth
-    await this.cacheManager.store.client?.expire(key, 3600);
+    // Store the event data in cache with TTL
+    // Note: Direct Redis operations would require accessing the underlying client
+    // For now, we'll use the cache manager's set method
+    await this.cacheManager.set(key, eventData, 3600 * 1000); // 1 hour in milliseconds
   }
 }

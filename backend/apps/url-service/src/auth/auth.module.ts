@@ -12,10 +12,15 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     PrismaModule,
     PassportModule,
     JwtModule.registerAsync({
-      useFactory: () => ({
-        secret: process.env.JWT_SECRET || 'changeme',
-        signOptions: { expiresIn: process.env.JWT_EXPIRES_IN || '1h' },
-      }),
+      useFactory: () => {
+        const expiresIn = process.env.JWT_EXPIRES_IN || '1h';
+        return {
+          secret: process.env.JWT_SECRET || 'changeme',
+          signOptions: { 
+            expiresIn: expiresIn as any
+          },
+        };
+      },
     }),
   ],
   controllers: [AuthController],

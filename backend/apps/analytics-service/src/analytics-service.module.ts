@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
+import { AppController } from './analytics-service.controller';
 import { AnalyticsServiceService } from './analytics-service.service';
-import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './rabbitmq.module';
 import { PrismaModule } from './prisma.module';
 
 @Module({

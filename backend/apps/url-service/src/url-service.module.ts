@@ -10,7 +10,7 @@ import { ThrottlerStorageRedisService } from '@nest-lab/throttler-storage-redis'
 import { Redis } from 'ioredis';
 import { DynamicThrottlerGuard } from './guards/dynamic-throttler.guard';
 import { RedisCacheService } from './redis.service';
-import { RabbitMQModule } from '../../../../libs/common/src/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from './rabbitmq.module';
 import { AuthModule } from './auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
@@ -31,14 +31,8 @@ import { AnalyticsGateway } from './analytics.gateway';
       useFactory: () => ({
         throttlers: [
           {
-            name: 'anonymous',
             ttl: 60000,
             limit: 10,
-          },
-          {
-            name: 'authenticated',
-            ttl: 60000,
-            limit: 100,
           },
         ],
         storage: new ThrottlerStorageRedisService(new Redis()),

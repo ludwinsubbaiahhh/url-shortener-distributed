@@ -1,9 +1,8 @@
-version: '3.8'
-
 services:
   # 1. PostgreSQL Database
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15
+    platform: linux/amd64
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
@@ -50,14 +49,15 @@ services:
 
   url-service:
     build: ./backend
-    command: sh -c "npx -r dotenv/config prisma db push && node dist/apps/url-service/main"
+    command: sh -c "cd /app && npx -r dotenv/config prisma db push && node dist/apps/url-service/main.js"
     ports:
       - "3001:3001" # Main API port
     environment:
+      PORT: "3001"
       DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
       REDIS_URL: "redis://redis:6379"
       RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"
-      JWT_SECRET: "YOUR_SUPER_SECRET_KEY_CHANGE_THIS"
+      JWT_SECRET: "G62Q5INegUdWVH7SlyczMvwoPO8CrtjA4siabnhKqZuBRp3EDfF0LJXT1mxk9Y"
       JWT_EXPIRES_IN: "1d"
     depends_on:
       postgres:
@@ -69,10 +69,11 @@ services:
 
   analytics-service:
     build: ./backend
-    command: node dist/apps/analytics-service/main
+    command: node dist/apps/analytics-service/main.js
     ports:
       - "3002:3002"
     environment:
+      PORT: "3002"
       DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
       REDIS_URL: "redis://redis:6379"
       RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"
@@ -81,10 +82,11 @@ services:
 
   worker-service:
     build: ./backend
-    command: node dist/apps/worker-service/main
+    command: node dist/apps/worker-service/main.js
     ports:
       - "3003:3003"
     environment:
+      PORT: "3003"
       DATABASE_URL: "postgresql://user:password@postgres:5432/urldb"
       REDIS_URL: "redis://redis:6379"
       RABBITMQ_URL: "amqp://admin:password@rabbitmq:5672"

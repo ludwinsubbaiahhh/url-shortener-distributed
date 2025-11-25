@@ -1,7 +1,8 @@
 'use client'
 
 import React from 'react'
-import { ApolloClient, InMemoryCache, ApolloProvider, HttpLink, ApolloLink } from '@apollo/client'
+import { ApolloClient, InMemoryCache, HttpLink, ApolloLink } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { setContext } from '@apollo/client/link/context'
 import { useAuthStore } from '../store/auth.store'

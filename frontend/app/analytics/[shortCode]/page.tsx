@@ -4,8 +4,8 @@ import React from 'react'
 import ProtectedRoute from '../../../src/components/ProtectedRoute'
 import { useParams } from 'next/navigation'
 import io from 'socket.io-client'
-// @ts-ignore - TypeScript cache issue, useQuery is exported from @apollo/client
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   LineChart,
@@ -21,6 +21,17 @@ import {
   Bar,
   Legend,
 } from 'recharts'
+
+type UrlAnalyticsRow = {
+  id: string
+  clickedAt: string
+  ipAddress: string | null
+  country: string | null
+  city: string | null
+  device: string | null
+  browser: string | null
+  referrer: string | null
+}
 
 const URL_ANALYTICS = gql`
   query UrlAnalytics($shortCode: String!) {
@@ -42,9 +53,9 @@ const COLORS = ['#2563eb', '#16a34a', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'
 export default function AnalyticsPage() {
   const params = useParams<{ shortCode: string }>()
   const shortCode = params?.shortCode
-  const [liveClicks, setLiveClicks] = React.useState<any[]>([])
+  const [liveClicks, setLiveClicks] = React.useState<UrlAnalyticsRow[]>([])
 
-  const { data, loading, error } = useQuery(URL_ANALYTICS, {
+  const { data, loading, error } = useQuery<{ urlAnalytics: UrlAnalyticsRow[] }>(URL_ANALYTICS, {
     variables: { shortCode },
     skip: !shortCode,
     fetchPolicy: 'cache-and-network',
