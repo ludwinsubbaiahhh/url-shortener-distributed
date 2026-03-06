@@ -63,7 +63,7 @@ export default function AnalyticsPage() {
 
   React.useEffect(() => {
     if (!shortCode) return
-    const socket = io('http://localhost:3001', { transports: ['websocket'] })
+    const socket = io({ path: '/socket.io/', transports: ['websocket'] })
     socket.on('connect', () => {
       socket.emit('join_room', { shortCode })
     })

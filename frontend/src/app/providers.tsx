@@ -12,7 +12,7 @@ type ProvidersProps = {
 }
 
 function createApolloClient() {
-	const httpLink = new HttpLink({ uri: 'http://localhost:3001/graphql' })
+	const httpLink = new HttpLink({ uri: '/graphql' })
 	const authLink = setContext((_, { headers }) => {
 		const token = useAuthStore.getState().token
 		return {

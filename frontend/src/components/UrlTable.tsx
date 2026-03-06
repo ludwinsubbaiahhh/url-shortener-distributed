@@ -66,7 +66,7 @@ export default function UrlTable() {
       </TableHeader>
       <TableBody>
         {rows.map((r: any) => {
-          const shortUrl = `${process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3001'}/${r.shortCode}`
+          const shortUrl = `${typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost')}/${r.shortCode}`
           return (
             <TableRow key={r.id}>
               <TableCell className="max-w-[220px] truncate">

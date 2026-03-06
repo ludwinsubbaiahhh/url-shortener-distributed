@@ -26,7 +26,7 @@ export default function UrlShortenerForm() {
 
 	const mutation = useMutation({
 		mutationFn: async (payload: { longUrl: string; customAlias?: string }) => {
-			const res = await axios.post<ShortenResponse>('http://localhost:3001/api/shorten', payload, {
+			const res = await axios.post<ShortenResponse>('/api/shorten', payload, {
 				withCredentials: true,
 			})
 			return res.data

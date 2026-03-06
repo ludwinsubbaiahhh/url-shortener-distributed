@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user"]
+      test: ["CMD-SHELL", "pg_isready -U user -d urldb"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -49,7 +49,7 @@ services:
 
   url-service:
     build: ./backend
-    command: sh -c "cd /app && npx -r dotenv/config prisma db push && node dist/apps/url-service/main.js"
+    command: sh -c "cd /app && npx prisma db push --skip-generate && node dist/apps/url-service/main.js"
     ports:
       - "3001:3001" # Main API port
     environment:

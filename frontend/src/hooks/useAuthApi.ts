@@ -18,12 +18,12 @@ export function useAuthApi() {
 	const logout = useAuthStore((s) => s.logout)
 
 	async function registerUser(email: string, password: string) {
-		const res = await axios.post('http://localhost:3001/auth/register', { email, password }, { withCredentials: true })
+		const res = await axios.post('/auth/register', { email, password }, { withCredentials: true })
 		return res.data
 	}
 
 	async function loginUser(email: string, password: string) {
-		const res = await axios.post<{ access_token: string }>('http://localhost:3001/auth/login', { email, password }, { withCredentials: true })
+		const res = await axios.post<{ access_token: string }>('/auth/login', { email, password }, { withCredentials: true })
 		const token = res.data?.access_token
 		if (token) {
 			const payload = parseJwt(token)
