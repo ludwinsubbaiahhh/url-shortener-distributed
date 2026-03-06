@@ -11,10 +11,10 @@ export class UrlType {
   @Field()
   shortCode: string;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   customAlias?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => Date, { nullable: true })
   expiresAt?: Date | null;
 
   @Field()

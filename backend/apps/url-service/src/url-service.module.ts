@@ -15,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver } from '@nestjs/apollo';
 import { AnalyticsGateway } from './analytics.gateway';
+import { UrlResolver } from './graphql/url.resolver';
 
 @Module({
   imports: [
@@ -28,15 +29,19 @@ import { AnalyticsGateway } from './analytics.gateway';
       playground: true,
     }),
     ThrottlerModule.forRootAsync({
-      useFactory: () => ({
-        throttlers: [
-          {
-            ttl: 60000,
-            limit: 10,
-          },
-        ],
-        storage: new ThrottlerStorageRedisService(new Redis()),
-      }),
+      useFactory: () => {
+        const redisUrl = process.env.REDIS_URL || 'redis://redis:6379';
+        const redis = new Redis(redisUrl);
+        return {
+          throttlers: [
+            {
+              ttl: 60000,
+              limit: 10,
+            },
+          ],
+          storage: new ThrottlerStorageRedisService(redis),
+        };
+      },
     }),
   ],
   controllers: [UrlServiceController],
@@ -45,6 +50,7 @@ import { AnalyticsGateway } from './analytics.gateway';
     UrlService,
     RedisCacheService,
     AnalyticsGateway,
+    UrlResolver,
     {
       provide: APP_GUARD,
       useClass: DynamicThrottlerGuard,

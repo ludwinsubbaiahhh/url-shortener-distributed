@@ -8,22 +8,22 @@ export class AnalyticsType {
   @Field()
   clickedAt: Date;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   ipAddress?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   country?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   city?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   device?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   browser?: string | null;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   referrer?: string | null;
 }
 
